@@ -1,5 +1,9 @@
 const fs = require('fs')
 const path = require('path')
+let mode = {
+  c: true,
+  d: true
+}
 
 class ConversionUtil {
   constructor(fileName) {
@@ -27,7 +31,10 @@ class ConversionUtil {
     const lineData = data.split('\n')
 
     lineData.forEach(item => {
-      let newLine = this.getData_c(item) || this.getData_d(item) || this.getJyp(item) || item
+      let newLine = (mode.c && this.getData_c(item))
+        || (mode.d && this.getData_d(item))
+        || this.getJyp(item)
+        || item
       this.dataArray.push(newLine)
     })
     this.writeData(this.dataArray)
@@ -36,8 +43,8 @@ class ConversionUtil {
   getJyp(line) {
     let temp = line
     return line.includes('sgjl')
-            ? temp = temp.replace('sgjl','jyp')
-            : null
+      ? temp = temp.replace('sgjl', 'jyp')
+      : null
   }
 
   getData_c(line) {
@@ -105,7 +112,7 @@ class ConversionUtil {
         console.error(err)
         return
       }
-      console.log(this.fileName.replace('.vue', '_g.vue')+ '写入成功')
+      console.log(this.fileName.replace('.vue', '_g.vue') + '写入成功')
     })
   }
 }
@@ -115,15 +122,27 @@ const createInstance = (fileName) => {
   return new ConversionUtil(fileName)
 }
 
-const getPath = arr => {
+const getArgs = () => {
   return process.argv.slice(2).reduce((prev, curr) => {
     const [key, value] = [curr.split('=')[0], curr.split('=')[1]]
     prev[key] = value
     return prev
-  }, {}).path
+  }, {})
 }
 
+const getPath = arr => getArgs().path
+
+
+
 const folderPath = getPath() || __dirname
+
+if (getArgs().ignore) {
+  const arr = getArgs().ignore.split(',')
+  for (let i of arr) {
+    console.log(i)
+    mode[i] = false
+  }
+}
 
 try {
   fs.readdirSync(folderPath).map(fileName => {
