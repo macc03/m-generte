@@ -27,10 +27,17 @@ class ConversionUtil {
     const lineData = data.split('\n')
 
     lineData.forEach(item => {
-      let newLine = this.getData_c(item) || this.getData_d(item) || item
+      let newLine = this.getData_c(item) || this.getData_d(item) || this.getJyp(item) || item
       this.dataArray.push(newLine)
     })
     this.writeData(this.dataArray)
+  }
+
+  getJyp(line) {
+    let temp = line
+    return line.includes('sgjl')
+            ? temp = temp.replace('sgjl','jyp')
+            : null
   }
 
   getData_c(line) {
@@ -98,7 +105,7 @@ class ConversionUtil {
         console.error(err)
         return
       }
-      //文件写入成功。
+      console.log(this.fileName.replace('.vue', '_g.vue')+ '写入成功')
     })
   }
 }
